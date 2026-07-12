@@ -12,7 +12,7 @@ body {
 }
 
 /* ── App Layout ── */
-.app-container { display: flex; min-height: 100vh; }
+.app-container { display: flex; flex: 1; }
 
 /* ── Sidebar ── */
 .sidebar {
@@ -67,7 +67,6 @@ body {
     margin-left: 260px;
     flex: 1;
     padding: 24px 32px 100px;
-    min-height: 100vh;
 }
 .page-header {
     display: flex;
