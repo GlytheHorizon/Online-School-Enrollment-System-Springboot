@@ -57,7 +57,7 @@
                         <i class="fas fa-book-open"></i>
                         <p>No enrolled courses.</p>
                     </div>
-                    <table th:if="${!#lists.isEmpty(enrollments)}" class="table">
+                    <div th:if="${!#lists.isEmpty(enrollments)}" class="table-wrap"><table class="table">
                         <thead>
                             <tr>
                                 <th>Course Code</th>
@@ -78,7 +78,7 @@
                                 <td th:text="'P' + ${#numbers.formatDecimal(e.totalTuition - (paidMap.get(e.enrollmentId) ?: 0), 1, 2)}">P4500.00</td>
                             </tr>
                         </tbody>
-                    </table>
+                    </table></div>
                 </div>
             </div>
 

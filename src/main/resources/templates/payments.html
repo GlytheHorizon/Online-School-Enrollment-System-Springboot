@@ -34,7 +34,7 @@
                         <i class="fas fa-coins"></i>
                         <p>No enrollment balances found.</p>
                     </div>
-                    <table th:if="${!#lists.isEmpty(studentBalances)}" class="table" id="balanceTable">
+                    <div th:if="${!#lists.isEmpty(studentBalances)}" class="table-wrap"><table class="table" id="balanceTable">
                         <thead>
                             <tr>
                                 <th>Student ID</th>
@@ -56,7 +56,7 @@
                                 <td th:text="'P' + ${#numbers.formatDecimal(row.balance, 1, 2)}">P4500.00</td>
                             </tr>
                         </tbody>
-                    </table>
+                    </table></div>
                     <div class="summary-row">
                         <span><strong>Total Balance:</strong> P<span id="totalBalance" th:text="${#numbers.formatDecimal(grandTotalTuition - grandTotalPaid, 1, 2)}">0.00</span></span>
                         <span><strong>Total Paid:</strong> P<span id="totalPaid" th:text="${#numbers.formatDecimal(grandTotalPaid, 1, 2)}">0.00</span></span>
@@ -113,7 +113,7 @@
                         <i class="fas fa-receipt"></i>
                         <p>No payment history found.</p>
                     </div>
-                    <table th:if="${!#lists.isEmpty(payments)}" class="table">
+                    <div th:if="${!#lists.isEmpty(payments)}" class="table-wrap"><table class="table">
                         <thead>
                             <tr>
                                 <th>Name</th>
@@ -132,7 +132,7 @@
                                 <td th:text="${p.paymentDate}">2024-01-15</td>
                             </tr>
                         </tbody>
-                    </table>
+                    </table></div>
                 </div>
             </div>
 
