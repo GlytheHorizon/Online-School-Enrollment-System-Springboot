@@ -78,11 +78,7 @@
                                 <td th:text="'P' + ${#numbers.formatDecimal(c.totalTuition, 1, 2)}">P4500.00</td>
                                 <td class="actions-cell">
                                     <button class="btn btn-sm btn-secondary" onclick="editCourse(this)" 
-                                        data-id="${c.courseId}"
-                                        data-code="${c.courseCode}"
-                                        data-name="${c.courseName}"
-                                        data-units="${c.units}"
-                                        data-tuition="${c.tuitionPerUnit}">
+                                        th:attr="data-id=${c.courseId},data-code=${c.courseCode},data-name=${c.courseName},data-units=${c.units},data-tuition=${c.tuitionPerUnit}">
                                         <i class="fas fa-edit"></i> Edit
                                     </button>
                                     <form th:action="@{/courses/{id}/deactivate(id=${c.courseId})}" method="post" style="display:inline" data-confirm="Deactivate this course? It will be hidden from active lists." data-confirm-title="Deactivate Course" data-confirm-type="warning">
