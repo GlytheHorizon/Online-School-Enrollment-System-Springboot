@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head('Student Registration — Online School Enrollment System')}"></head>
+<body>
+    <div class="app-container">
+        <div th:replace="~{fragments/header :: nav}"></div>
+        <main class="main-content">
+            <div class="page-header">
+                <h1><i class="fas fa-user-graduate"></i> Student Registration</h1>
+            </div>
+            <div th:replace="~{fragments/header :: alerts}"></div>
+
+            <div class="card">
+                <div class="card-header">Register New Student</div>
+                <div class="card-body">
+                    <form th:action="@{/students/register}" method="post" class="form-grid-2">
+                        <div class="form-group">
+                            <label>Student ID <span class="required">*</span></label>
+                            <input type="text" name="studentId" class="form-control" pattern="\d{4}-\d{4}" placeholder="2024-0001" required title="Format: XXXX-XXXX">
+                        </div>
+                        <div class="form-group">
+                            <label>First Name <span class="required">*</span></label>
+                            <input type="text" name="firstName" class="form-control" placeholder="Juan" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Last Name <span class="required">*</span></label>
+                            <input type="text" name="lastName" class="form-control" placeholder="Dela Cruz" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email <span class="required">*</span></label>
+                            <input type="email" name="email" class="form-control" placeholder="email@example.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Phone</label>
+                            <input type="text" name="phone" class="form-control" placeholder="09XXXXXXXXX" pattern="\d{0,11}">
+                        </div>
+                        <div class="form-group">
+                            <label>Address</label>
+                            <input type="text" name="address" class="form-control" placeholder="Street, City, Province">
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Register</button>
+                            <button type="reset" class="btn btn-ghost">Clear</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <script>
+                function formatStudentId(input) {
+                    let val = input.value.replace(/\D/g, '').slice(0, 8);
+                    if (val.length > 4) {
+                        val = val.slice(0, 4) + '-' + val.slice(4);
+                    }
+                    input.value = val;
+                }
+                function limitPhone(input) {
+                    input.value = input.value.replace(/\D/g, '').slice(0, 11);
+                }
+                document.querySelector('input[name="studentId"]').addEventListener('input', function() { formatStudentId(this); });
+                document.querySelector('input[name="phone"]').addEventListener('input', function() { limitPhone(this); });
+            </script>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-header-row">
+                        <span th:text="${archived} ? 'Archived Students' : 'Registered Students'">Registered Students</span>
+                        <div class="card-actions">
+                            <form method="get" th:action="@{/students}" class="search-form">
+                                <input type="hidden" name="archived" th:value="${archived ? 'true' : 'false'}">
+                                <input type="text" name="search" class="form-control search-input" placeholder="Search students..." th:value="${search}">
+                                <button type="submit" class="btn btn-secondary"><i class="fas fa-search"></i> Search</button>
+                                <a th:href="@{/students(archived=${archived})}" class="btn btn-ghost"><i class="fas fa-sync"></i> Refresh</a>
+                            </form>
+                            <a th:href="@{/students(archived=${!archived})}" class="btn btn-outline" th:style="'color:' + (${archived} ? '#16a34a' : '#7c3aed')">
+                                <i class="fas" th:classappend="${archived} ? 'fa-users' : 'fa-archive'"></i>
+                                <span th:text="${archived} ? 'Show Active' : 'Show Archived'">Show Archived</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div th:if="${#lists.isEmpty(students)}" class="empty-state">
+                        <i class="fas fa-users-slash"></i>
+                        <p th:text="${archived} ? 'No archived students.' : 'No students found.'">No students found.</p>
+                    </div>
+                    <table th:if="${!#lists.isEmpty(students)}" class="table">
+                        <thead>
+                            <tr>
+                                <th>Student ID</th>
+                                <th>First Name</th>
+                                <th>Last Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Address</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="s : ${students}">
+                                <td th:text="${s.studentId}">2024-0001</td>
+                                <td th:text="${s.firstName}">Juan</td>
+                                <td th:text="${s.lastName}">Dela Cruz</td>
+                                <td th:text="${s.email}">email@example.com</td>
+                                <td th:text="${s.phone}">09123456789</td>
+                                <td th:text="${s.address}">Street, City</td>
+                                <td class="actions-cell">
+                                    <a th:href="@{/students/{id}(id=${s.studentId})}" class="btn btn-sm btn-secondary"><i class="fas fa-eye"></i></a>
+                                    <form th:if="${!archived}" th:action="@{/students/{id}/deactivate(id=${s.studentId})}" method="post" style="display:inline" onsubmit="return confirm('Deactivate this student?\nThey will be hidden from active lists.')">
+                                        <button type="submit" class="btn btn-sm btn-danger"><i class="fas fa-user-slash"></i></button>
+                                    </form>
+                                    <form th:if="${archived}" th:action="@{/students/{id}/reactivate(id=${s.studentId})}" method="post" style="display:inline" onsubmit="return confirm('Reactivate this student?')">
+                                        <button type="submit" class="btn btn-sm btn-success"><i class="fas fa-user-check"></i></button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+    <div th:replace="~{fragments/header :: footer}"></div>
+</body>
+</html>

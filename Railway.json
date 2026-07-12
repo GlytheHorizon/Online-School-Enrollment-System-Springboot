@@ -1,0 +1,12 @@
+{
+  "build": {
+    "builder": "maven",
+    "buildCommand": "mvn clean package -DskipTests"
+  },
+  "deploy": {
+    "startCommand": "java -jar target/enrollment-1.0.0.jar --server.port=$PORT",
+    "healthcheckPath": "/",
+    "healthcheckTimeout": 120,
+    "restartPolicyType": "on-failure"
+  }
+}

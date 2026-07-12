@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head('Student Details — Online School Enrollment System')}"></head>
+<body>
+    <div class="app-container">
+        <div th:replace="~{fragments/header :: nav}"></div>
+        <main class="main-content">
+            <div class="page-header">
+                <h1><i class="fas fa-user"></i> Student Details</h1>
+                <a th:href="@{/students}" class="btn btn-ghost"><i class="fas fa-arrow-left"></i> Back to List</a>
+            </div>
+            <div th:replace="~{fragments/header :: alerts}"></div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span th:text="'Student: ' + ${student.studentId}">Student: 2024-0001</span>
+                    <span th:if="${!student.active}" class="badge badge-warning">Inactive</span>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/students/{id}/update(id=${student.studentId})}" method="post" class="form-grid-2">
+                        <div class="form-group">
+                            <label>Student ID</label>
+                            <input type="text" class="form-control" th:value="${student.studentId}" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label>Email <span class="required">*</span></label>
+                            <input type="email" name="email" class="form-control" th:value="${student.email}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>First Name <span class="required">*</span></label>
+                            <input type="text" name="firstName" class="form-control" th:value="${student.firstName}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Phone</label>
+                            <input type="text" name="phone" class="form-control" th:value="${student.phone}">
+                        </div>
+                        <div class="form-group">
+                            <label>Last Name <span class="required">*</span></label>
+                            <input type="text" name="lastName" class="form-control" th:value="${student.lastName}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Address</label>
+                            <input type="text" name="address" class="form-control" th:value="${student.address}">
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Save Changes</button>
+                            <a th:href="@{/students/{id}(id=${student.studentId})}" class="btn btn-ghost">Cancel</a>
+                        </div>
+                    </form>
+                    <script>
+                        function limitPhone(input) {
+                            input.value = input.value.replace(/\D/g, '').slice(0, 11);
+                        }
+                        document.querySelector('input[name="phone"]').addEventListener('input', function() { limitPhone(this); });
+                    </script>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">Enrolled Courses</div>
+                <div class="card-body p-0">
+                    <div th:if="${#lists.isEmpty(enrollments)}" class="empty-state">
+                        <i class="fas fa-book-open"></i>
+                        <p>No enrolled courses.</p>
+                    </div>
+                    <table th:if="${!#lists.isEmpty(enrollments)}" class="table">
+                        <thead>
+                            <tr>
+                                <th>Course Code</th>
+                                <th>Course</th>
+                                <th>Units</th>
+                                <th>Tuition</th>
+                                <th>Paid</th>
+                                <th>Balance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="e : ${enrollments}">
+                                <td th:text="${e.courseCode}">CS101</td>
+                                <td th:text="${e.courseName}">Programming</td>
+                                <td th:text="${e.units}">3</td>
+                                <td th:text="'P' + ${#numbers.formatDecimal(e.totalTuition, 1, 2)}">P4500.00</td>
+                                <td th:text="'P' + ${#numbers.formatDecimal(paidMap.get(e.enrollmentId) ?: 0, 1, 2)}">P0.00</td>
+                                <td th:text="'P' + ${#numbers.formatDecimal(e.totalTuition - (paidMap.get(e.enrollmentId) ?: 0), 1, 2)}">P4500.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="action-bar">
+                <form th:if="${student.active}" th:action="@{/students/{id}/deactivate(id=${student.studentId})}" method="post" style="display:inline" onsubmit="return confirmDeactivate()">
+                    <button type="submit" class="btn btn-danger"><i class="fas fa-user-slash"></i> Deactivate Student</button>
+                </form>
+                <form th:if="${!student.active}" th:action="@{/students/{id}/reactivate(id=${student.studentId})}" method="post" style="display:inline" onsubmit="return confirm('Reactivate this student? They will appear in active lists again.')">
+                    <button type="submit" class="btn btn-success"><i class="fas fa-user-check"></i> Reactivate Student</button>
+                </form>
+            </div>
+        </main>
+    </div>
+    <div th:replace="~{fragments/header :: footer}"></div>
+    <script>
+        function confirmDeactivate() {
+            return confirm('Deactivate this student? They will be hidden from active lists.');
+        }
+    </script>
+</body>
+</html>

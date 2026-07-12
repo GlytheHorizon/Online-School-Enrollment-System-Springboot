@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head('Tuition Payment — Online School Enrollment System')}"></head>
+<body>
+    <div class="app-container">
+        <div th:replace="~{fragments/header :: nav}"></div>
+        <main class="main-content">
+            <div class="page-header">
+                <h1><i class="fas fa-credit-card"></i> Tuition Payment</h1>
+            </div>
+            <div th:replace="~{fragments/header :: alerts}"></div>
+
+            <div class="card">
+                <div class="card-header">Select Student</div>
+                <div class="card-body">
+                    <form method="get" th:action="@{/payments}" class="form-inline">
+                        <div class="form-group" style="flex: 1;">
+                            <label>Student</label>
+                            <select name="studentId" class="form-control" onchange="this.form.submit()">
+                                <option value="">All Students</option>
+                                <option th:each="s : ${students}" th:value="${s.studentId}" th:selected="${selectedStudentId == s.studentId}"
+                                        th:text="${s.studentId} + ' - ' + ${s.fullName}"></option>
+                            </select>
+                        </div>
+                        <a th:href="@{/payments}" class="btn btn-ghost">Clear</a>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">Tuition Balance Summaries</div>
+                <div class="card-body p-0">
+                    <div th:if="${#lists.isEmpty(studentBalances)}" class="empty-state">
+                        <i class="fas fa-coins"></i>
+                        <p>No enrollment balances found.</p>
+                    </div>
+                    <table th:if="${!#lists.isEmpty(studentBalances)}" class="table" id="balanceTable">
+                        <thead>
+                            <tr>
+                                <th>Student ID</th>
+                                <th>Student Name</th>
+                                <th>Total Tuition</th>
+                                <th>Payment Made</th>
+                                <th>Balance Left</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="row : ${studentBalances}" th:classappend="${row.balance <= 0} ? 'fully-paid' : ''"
+                                th:data-balance="${row.balance}"
+                                th:data-student="${row.studentId}"
+                                onclick="selectBalanceRow(this)">
+                                <td th:text="${row.studentId}">2024-0001</td>
+                                <td th:text="${row.studentName}">Juan Dela Cruz</td>
+                                <td th:text="'P' + ${#numbers.formatDecimal(row.totalTuition, 1, 2)}">P4500.00</td>
+                                <td th:text="'P' + ${#numbers.formatDecimal(row.totalPaid, 1, 2)}">P0.00</td>
+                                <td th:text="'P' + ${#numbers.formatDecimal(row.balance, 1, 2)}">P4500.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="summary-row">
+                        <span><strong>Total Balance:</strong> P<span id="totalBalance" th:text="${#numbers.formatDecimal(grandTotalTuition - grandTotalPaid, 1, 2)}">0.00</span></span>
+                        <span><strong>Total Paid:</strong> P<span id="totalPaid" th:text="${#numbers.formatDecimal(grandTotalPaid, 1, 2)}">0.00</span></span>
+                        <span><strong>To Pay:</strong> P<span id="toPay">0.00</span></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">Process Payment</div>
+                <div class="card-body">
+                    <form th:action="@{/payments/pay}" method="post" class="form-grid-2" id="paymentForm">
+                        <input type="hidden" name="studentId" th:value="${selectedStudentId}" id="payStudentId">
+                        <div class="form-group">
+                            <label>Amount (P) <span class="required">*</span></label>
+                            <input type="number" step="0.01" name="amount" class="form-control" placeholder="0.00" min="0.01" required id="payAmount">
+                        </div>
+                        <div class="form-group">
+                            <label>Method</label>
+                            <select name="paymentMethod" class="form-control">
+                                <option value="Cash">Cash</option>
+                                <option value="Bank Transfer">Bank Transfer</option>
+                                <option value="Check">Check</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Reference # <span class="required">*</span></label>
+                            <input type="text" name="referenceNumber" class="form-control" placeholder="Reference number" required>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-success"><i class="fas fa-credit-card"></i> Pay Balance</button>
+                            <button type="reset" class="btn btn-ghost">Clear</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-header-row">
+                        <span>Payment History</span>
+                        <div class="card-actions">
+                            <form method="get" th:action="@{/payments}" class="search-form">
+                                <input type="hidden" name="studentId" th:value="${selectedStudentId}">
+                                <input type="text" name="search" class="form-control search-input" placeholder="Search payments..." th:value="${search}">
+                                <button type="submit" class="btn btn-secondary"><i class="fas fa-search"></i> Search</button>
+                                <a th:href="@{/payments(studentId=${selectedStudentId})}" class="btn btn-ghost"><i class="fas fa-sync"></i> Show All</a>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div th:if="${#lists.isEmpty(payments)}" class="empty-state">
+                        <i class="fas fa-receipt"></i>
+                        <p>No payment history found.</p>
+                    </div>
+                    <table th:if="${!#lists.isEmpty(payments)}" class="table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Payment</th>
+                                <th>Method</th>
+                                <th>Reference</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="p : ${payments}">
+                                <td th:text="${p.studentName}">Juan Dela Cruz</td>
+                                <td th:text="'P' + ${#numbers.formatDecimal(p.amount, 1, 2)}">P1000.00</td>
+                                <td th:text="${p.paymentMethod}">Cash</td>
+                                <td th:text="${p.referenceNumber}">REF-001</td>
+                                <td th:text="${p.paymentDate}">2024-01-15</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">Delete Payment Record</div>
+                <div class="card-body">
+                    <form th:action="@{/payments/delete}" method="post" class="form-inline" onsubmit="return confirm('Are you sure you want to delete all payments with this reference number?')">
+                        <input type="hidden" name="studentId" th:value="${selectedStudentId}">
+                        <div class="form-group" style="flex: 1;">
+                            <label>Reference Number</label>
+                            <input type="text" name="referenceNumber" class="form-control" placeholder="Enter reference number to delete" required>
+                        </div>
+                        <button type="submit" class="btn btn-danger"><i class="fas fa-trash"></i> Delete Record</button>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+    <div th:replace="~{fragments/header :: footer}"></div>
+    <script>
+        function selectBalanceRow(row) {
+            const balance = parseFloat(row.dataset.balance);
+            const studentId = row.dataset.student;
+            if (balance <= 0) {
+                row.classList.remove('selected');
+                return;
+            }
+            document.querySelectorAll('#balanceTable tbody tr').forEach(r => r.classList.remove('selected'));
+            row.classList.add('selected');
+            document.getElementById('payStudentId').value = studentId;
+            document.getElementById('payAmount').value = balance.toFixed(2);
+            document.getElementById('toPay').textContent = balance.toFixed(2);
+
+            const form = document.getElementById('paymentForm');
+            form.querySelector('button[type="submit"]').innerHTML = '<i class="fas fa-credit-card"></i> Pay P' + balance.toFixed(2);
+        }
+
+        const totalBal = parseFloat(document.getElementById('totalBalance').textContent.replace(/,/g, ''));
+        document.getElementById('toPay').textContent = totalBal.toFixed(2);
+
+        function limitDecimal(input) {
+            let val = input.value.replace(/[^\d.]/g, '');
+            let parts = val.split('.');
+            if (parts.length > 2) val = parts[0] + '.' + parts.slice(1).join('');
+            if (parts.length === 2 && parts[1].length > 2) val = parts[0] + '.' + parts[1].slice(0, 2);
+            input.value = val;
+        }
+        document.getElementById('payAmount').addEventListener('input', function() { limitDecimal(this); });
+    </script>
+</body>
+</html>

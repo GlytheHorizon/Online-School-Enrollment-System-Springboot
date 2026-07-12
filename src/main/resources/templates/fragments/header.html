@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">Online School Enrollment System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div th:fragment="nav">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-icon"><i class="fas fa-graduation-cap"></i></div>
+                <h2>School Enrollment</h2>
+                <p class="subtitle">Student records & billing</p>
+            </div>
+            <ul class="nav-links">
+                <li><a th:href="@{/}" th:classappend="${currentPage == 'dashboard' ? 'active' : ''}" href="/"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a th:href="@{/students}" th:classappend="${currentPage == 'students' ? 'active' : ''}" href="/students"><i class="fas fa-user-graduate"></i> Student Registration</a></li>
+                <li><a th:href="@{/courses}" th:classappend="${currentPage == 'courses' ? 'active' : ''}" href="/courses"><i class="fas fa-book"></i> Course Management</a></li>
+                <li><a th:href="@{/enrollments}" th:classappend="${currentPage == 'enrollments' ? 'active' : ''}" href="/enrollments"><i class="fas fa-pen-to-square"></i> Enrollment</a></li>
+                <li><a th:href="@{/payments}" th:classappend="${currentPage == 'payments' ? 'active' : ''}" href="/payments"><i class="fas fa-credit-card"></i> Tuition Payment</a></li>
+            </ul>
+            <div class="sidebar-footer">
+                <p>v4.0 &middot; MVC + DAO</p>
+                <p>Group 2 &middot; TESDA 2026</p>
+            </div>
+        </nav>
+    </div>
+
+    <div th:fragment="alerts">
+        <div th:if="${success}" class="alert alert-success">
+            <i class="fas fa-check-circle"></i>
+            <span th:utext="${success}"></span>
+            <button class="alert-close" onclick="this.parentElement.remove()">&times;</button>
+        </div>
+        <div th:if="${error}" class="alert alert-error">
+            <i class="fas fa-exclamation-circle"></i>
+            <span th:utext="${error}"></span>
+            <button class="alert-close" onclick="this.parentElement.remove()">&times;</button>
+        </div>
+    </div>
+
+    <footer th:fragment="footer">
+        <div class="footer-content">
+            <span>&copy; 2026 TESDA Activity 15 — Group 2</span>
+            <span>Cruz, Layos, Lazaro, Matiga, Villabroza</span>
+        </div>
+    </footer>
+</body>
+</html>

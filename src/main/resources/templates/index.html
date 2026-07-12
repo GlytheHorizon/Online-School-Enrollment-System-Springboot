@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head('Dashboard — Online School Enrollment System')}"></head>
+<body>
+    <div class="app-container">
+        <div th:replace="~{fragments/header :: nav}"></div>
+        <main class="main-content">
+            <div class="page-header">
+                <h1><i class="fas fa-tachometer-alt"></i> Dashboard</h1>
+            </div>
+            <div th:replace="~{fragments/header :: alerts}"></div>
+
+            <div class="hero-card">
+                <div class="hero-icon"><i class="fas fa-graduation-cap"></i></div>
+                <div class="hero-text">
+                    <h1>Online School Enrollment System</h1>
+                    <p>MVC + DAO Architecture &middot; Spring Boot + MySQL</p>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #dbeafe; color: #2563eb;">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Students</h3>
+                        <p>Register, update, and manage student records</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #dcfce7; color: #16a34a;">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Courses</h3>
+                        <p>Add, update, and manage course offerings</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #fef3c7; color: #d97706;">
+                        <i class="fas fa-pen-to-square"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Enrollments</h3>
+                        <p>Enroll students in multiple courses</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #fce7f3; color: #db2777;">
+                        <i class="fas fa-credit-card"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Payments</h3>
+                        <p>Process tuition payments and track balances</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="team-section">
+                <h2>Group 2</h2>
+                <div class="team-grid">
+                    <div class="team-card"><i class="fas fa-user"></i> Cruz, Jerwin E.</div>
+                    <div class="team-card"><i class="fas fa-user"></i> Layos, Joland</div>
+                    <div class="team-card"><i class="fas fa-user"></i> Lazaro, Natalie Jane D.</div>
+                    <div class="team-card"><i class="fas fa-user"></i> Matiga, John Michael B.</div>
+                    <div class="team-card"><i class="fas fa-user"></i> Villabroza, Clark Darren J.</div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <div th:replace="~{fragments/header :: footer}"></div>
+</body>
+</html>

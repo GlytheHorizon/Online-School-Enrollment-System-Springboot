@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head('Course Management — Online School Enrollment System')}"></head>
+<body>
+    <div class="app-container">
+        <div th:replace="~{fragments/header :: nav}"></div>
+        <main class="main-content">
+            <div class="page-header">
+                <h1><i class="fas fa-book"></i> Course Management</h1>
+            </div>
+            <div th:replace="~{fragments/header :: alerts}"></div>
+
+            <div class="card">
+                <div class="card-header">Add / Update Course</div>
+                <div class="card-body">
+                    <form th:action="@{/courses/add}" method="post" class="form-grid-2" id="courseForm">
+                        <div class="form-group">
+                            <label>Course Code <span class="required">*</span></label>
+                            <input type="text" name="courseCode" class="form-control" placeholder="CS101" required id="courseCode">
+                        </div>
+                        <div class="form-group">
+                            <label>Course Name <span class="required">*</span></label>
+                            <input type="text" name="courseName" class="form-control" placeholder="Introduction to Programming" required id="courseName">
+                        </div>
+                        <div class="form-group">
+                            <label>Units</label>
+                            <input type="number" name="units" class="form-control" placeholder="3" min="1" required id="units">
+                        </div>
+                        <div class="form-group">
+                            <label>Tuition/Unit (P)</label>
+                            <input type="number" step="0.01" name="tuitionPerUnit" class="form-control" placeholder="1500.00" min="0.01" required id="tuitionPerUnit">
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-success"><i class="fas fa-plus"></i> Add Course</button>
+                            <button type="reset" class="btn btn-ghost">Clear</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-header-row">
+                        <span>Course List</span>
+                        <div class="card-actions">
+                            <form method="get" th:action="@{/courses}" class="search-form">
+                                <input type="text" name="search" class="form-control search-input" placeholder="Search courses..." th:value="${search}">
+                                <button type="submit" class="btn btn-secondary"><i class="fas fa-search"></i> Search</button>
+                                <a th:href="@{/courses}" class="btn btn-ghost"><i class="fas fa-sync"></i> Refresh</a>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div th:if="${#lists.isEmpty(courses)}" class="empty-state">
+                        <i class="fas fa-book-open"></i>
+                        <p>No courses found.</p>
+                    </div>
+                    <table th:if="${!#lists.isEmpty(courses)}" class="table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Code</th>
+                                <th>Name</th>
+                                <th>Units</th>
+                                <th>Tuition/Unit</th>
+                                <th>Total Tuition</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="c : ${courses}">
+                                <td th:text="${c.courseId}">1</td>
+                                <td th:text="${c.courseCode}">CS101</td>
+                                <td th:text="${c.courseName}">Programming</td>
+                                <td th:text="${c.units}">3</td>
+                                <td th:text="'P' + ${#numbers.formatDecimal(c.tuitionPerUnit, 1, 2)}">P1500.00</td>
+                                <td th:text="'P' + ${#numbers.formatDecimal(c.totalTuition, 1, 2)}">P4500.00</td>
+                                <td class="actions-cell">
+                                    <button class="btn btn-sm btn-secondary" onclick="editCourse(this)" 
+                                        data-id="${c.courseId}"
+                                        data-code="${c.courseCode}"
+                                        data-name="${c.courseName}"
+                                        data-units="${c.units}"
+                                        data-tuition="${c.tuitionPerUnit}">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </button>
+                                    <form th:action="@{/courses/{id}/deactivate(id=${c.courseId})}" method="post" style="display:inline" onsubmit="return confirm('Deactivate this course? It will be hidden from active lists.')">
+                                        <button type="submit" class="btn btn-sm btn-danger"><i class="fas fa-ban"></i></button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+    <div th:replace="~{fragments/header :: footer}"></div>
+    <script>
+        function editCourse(btn) {
+            const data = btn.dataset;
+            document.getElementById('courseCode').value = data.code;
+            document.getElementById('courseName').value = data.name;
+            document.getElementById('units').value = data.units;
+            document.getElementById('tuitionPerUnit').value = data.tuition;
+
+            const form = document.getElementById('courseForm');
+            form.action = '/courses/' + data.id + '/update';
+            form.querySelector('button[type="submit"]').innerHTML = '<i class="fas fa-save"></i> Update Course';
+        }
+        function limitInteger(input) {
+            input.value = input.value.replace(/\D/g, '');
+        }
+        function limitDecimal(input) {
+            let val = input.value.replace(/[^\d.]/g, '');
+            let parts = val.split('.');
+            if (parts.length > 2) val = parts[0] + '.' + parts.slice(1).join('');
+            if (parts.length === 2 && parts[1].length > 2) val = parts[0] + '.' + parts[1].slice(0, 2);
+            input.value = val;
+        }
+        document.getElementById('units').addEventListener('input', function() { limitInteger(this); });
+        document.getElementById('tuitionPerUnit').addEventListener('input', function() { limitDecimal(this); });
+    </script>
+</body>
+</html>
