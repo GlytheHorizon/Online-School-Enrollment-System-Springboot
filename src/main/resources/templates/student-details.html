@@ -32,7 +32,7 @@
                         </div>
                         <div class="form-group">
                             <label>Phone</label>
-                            <input type="text" name="phone" class="form-control" th:value="${student.phone}">
+                            <input type="text" name="phone" class="form-control" th:value="${student.phone}" data-format="phone">
                         </div>
                         <div class="form-group">
                             <label>Last Name <span class="required">*</span></label>
@@ -47,12 +47,6 @@
                             <a th:href="@{/students/{id}(id=${student.studentId})}" class="btn btn-ghost">Cancel</a>
                         </div>
                     </form>
-                    <script>
-                        function limitPhone(input) {
-                            input.value = input.value.replace(/\D/g, '').slice(0, 11);
-                        }
-                        document.querySelector('input[name="phone"]').addEventListener('input', function() { limitPhone(this); });
-                    </script>
                 </div>
             </div>
 
@@ -89,20 +83,18 @@
             </div>
 
             <div class="action-bar">
-                <form th:if="${student.active}" th:action="@{/students/{id}/deactivate(id=${student.studentId})}" method="post" style="display:inline" onsubmit="return confirmDeactivate()">
+                <form th:if="${student.active}" th:action="@{/students/{id}/deactivate(id=${student.studentId})}" method="post" style="display:inline" data-confirm="Deactivate this student? They will be hidden from active lists." data-confirm-title="Deactivate Student" data-confirm-type="warning">
                     <button type="submit" class="btn btn-danger"><i class="fas fa-user-slash"></i> Deactivate Student</button>
                 </form>
-                <form th:if="${!student.active}" th:action="@{/students/{id}/reactivate(id=${student.studentId})}" method="post" style="display:inline" onsubmit="return confirm('Reactivate this student? They will appear in active lists again.')">
+                <form th:if="${!student.active}" th:action="@{/students/{id}/reactivate(id=${student.studentId})}" method="post" style="display:inline" data-confirm="Reactivate this student? They will appear in active lists again." data-confirm-title="Reactivate Student" data-confirm-type="info" data-confirm-class="btn-success">
                     <button type="submit" class="btn btn-success"><i class="fas fa-user-check"></i> Reactivate Student</button>
+                </form>
+                <form th:action="@{/students/{id}/delete(id=${student.studentId})}" method="post" style="display:inline" data-confirm="Permanently delete this student? This cannot be undone." data-confirm-title="Delete Student" data-confirm-type="danger">
+                    <button type="submit" class="btn btn-danger"><i class="fas fa-trash"></i> Delete Student</button>
                 </form>
             </div>
         </main>
     </div>
     <div th:replace="~{fragments/header :: footer}"></div>
-    <script>
-        function confirmDeactivate() {
-            return confirm('Deactivate this student? They will be hidden from active lists.');
-        }
-    </script>
 </body>
 </html>

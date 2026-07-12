@@ -22,6 +22,7 @@ public class CourseController {
     @GetMapping
     public String list(@RequestParam(value = "search", required = false) String search, Model model) {
         List<Course> courses = courseService.searchActive(search);
+        model.addAttribute("currentPage", "courses");
         model.addAttribute("courses", courses);
         model.addAttribute("search", search);
         return "courses";
@@ -86,6 +87,18 @@ public class CourseController {
             redirectAttributes.addFlashAttribute("success", "Course deactivated successfully!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Error deactivating course: " + e.getMessage());
+        }
+        return "redirect:/courses";
+    }
+
+    @PostMapping("/{id}/delete")
+    public String delete(@PathVariable("id") int courseId,
+                         RedirectAttributes redirectAttributes) {
+        try {
+            courseService.delete(courseId);
+            redirectAttributes.addFlashAttribute("success", "Course permanently deleted!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
         }
         return "redirect:/courses";
     }

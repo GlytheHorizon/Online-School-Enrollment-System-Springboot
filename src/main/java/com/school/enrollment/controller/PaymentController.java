@@ -71,6 +71,7 @@ public class PaymentController {
             }
         }
 
+        model.addAttribute("currentPage", "payments");
         model.addAttribute("studentBalances", studentBalances);
         model.addAttribute("grandTotalTuition", grandTotalTuition);
         model.addAttribute("grandTotalPaid", grandTotalPaid);

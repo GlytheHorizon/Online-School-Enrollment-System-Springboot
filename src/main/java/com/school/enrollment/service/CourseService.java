@@ -55,4 +55,11 @@ public class CourseService {
     public boolean hasActiveEnrollments(int courseId) {
         return courseRepository.hasActiveEnrollments(courseId);
     }
+
+    public void delete(int courseId) {
+        if (hasActiveEnrollments(courseId)) {
+            throw new RuntimeException("Cannot delete course — it has active enrollments.");
+        }
+        courseRepository.deleteById(courseId);
+    }
 }

@@ -11,7 +11,7 @@
             <div th:replace="~{fragments/header :: alerts}"></div>
 
             <div class="card">
-                <div class="card-header">Enroll Student in Course</div>
+                <div class="card-header"><i class="fas fa-user-plus"></i> Enroll Student in Course</div>
                 <div class="card-body">
                     <form th:action="@{/enrollments/enroll}" method="post" class="form-grid-2">
                         <div class="form-group">
@@ -43,10 +43,10 @@
             <div class="card">
                 <div class="card-header">
                     <div class="card-header-row">
-                        <span>Active Enrollments</span>
+                        <span><i class="fas fa-users"></i> Active Enrollments</span>
                         <div class="card-actions">
                             <form method="get" th:action="@{/enrollments}" class="search-form">
-                                <input type="text" name="search" class="form-control search-input" placeholder="Search enrollments..." th:value="${search}">
+                                <input type="text" name="search" class="form-control search-input" placeholder="Search student name..." th:value="${search}">
                                 <button type="submit" class="btn btn-secondary"><i class="fas fa-search"></i> Search</button>
                                 <a th:href="@{/enrollments}" class="btn btn-ghost"><i class="fas fa-sync"></i> Show All</a>
                             </form>
@@ -54,53 +54,75 @@
                     </div>
                 </div>
                 <div class="card-body p-0">
-                    <div th:if="${#lists.isEmpty(enrollments)}" class="empty-state">
+                    <div th:if="${#lists.isEmpty(studentGroups)}" class="empty-state">
                         <i class="fas fa-file-invoice"></i>
                         <p>No enrollments found.</p>
                     </div>
-                    <table th:if="${!#lists.isEmpty(enrollments)}" class="table">
-                        <thead>
-                            <tr>
-                                <th>Student Name</th>
-                                <th>Course Code</th>
-                                <th>Course</th>
-                                <th>Units</th>
-                                <th>Total Tuition</th>
-                                <th>Paid</th>
-                                <th>Balance</th>
-                                <th>Status</th>
-                                <th>Date</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="e : ${enrollments}">
-                                <td th:text="${e.studentName}">Juan Dela Cruz</td>
-                                <td th:text="${e.courseCode}">CS101</td>
-                                <td th:text="${e.courseName}">Programming</td>
-                                <td th:text="${e.units}">3</td>
-                                <td th:text="'P' + ${#numbers.formatDecimal(e.totalTuition, 1, 2)}">P4500.00</td>
-                                <td th:text="'P' + ${#numbers.formatDecimal(paidMap.get(e.enrollmentId) ?: 0, 1, 2)}">P0.00</td>
-                                <td th:text="'P' + ${#numbers.formatDecimal(e.totalTuition - (paidMap.get(e.enrollmentId) ?: 0), 1, 2)}">P4500.00</td>
-                                <td><span class="badge badge-success" th:text="${e.status}">Enrolled</span></td>
-                                <td th:text="${e.enrollmentDate}">2024-01-15</td>
-                                <td class="actions-cell">
-                                    <form th:action="@{/enrollments/{id}/drop(id=${e.enrollmentId})}" method="post" style="display:inline"
-                                          th:attr="data-student=${e.studentName}, data-course=${e.courseName}"
-                                          onsubmit="return confirm('Drop ' + this.getAttribute('data-student') + ' from ' + this.getAttribute('data-course') + '?')">
-                                        <button type="submit" class="btn btn-sm btn-danger"><i class="fas fa-user-minus"></i> Drop</button>
-                                    </form>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <div th:if="${!#lists.isEmpty(studentGroups)}" class="accordion-enrollments">
+                        <div th:each="group, iter : ${studentGroups}" class="accordion-item">
+                            <div class="accordion-header" th:attr="data-target='enrollment-' + ${iter.index}" onclick="toggleAccordion(this)">
+                                <div class="accordion-info">
+                                    <span class="accordion-name"><i class="fas fa-user-graduate"></i> <span th:text="${group.studentName}">Juan Dela Cruz</span></span>
+                                    <span class="accordion-meta">
+                                        <span class="badge badge-info" th:text="${group.courseCount} + ' course(s)'">3 courses</span>
+                                    </span>
+                                </div>
+                                <div class="accordion-totals">
+                                    <span class="total-label">Tuition:</span>
+                                    <span class="total-value" th:text="'P' + ${#numbers.formatDecimal(group.totalTuition, 1, 2)}">P0.00</span>
+                                    <span class="total-label">Paid:</span>
+                                    <span class="total-value text-success" th:text="'P' + ${#numbers.formatDecimal(group.totalPaid, 1, 2)}">P0.00</span>
+                                    <span class="total-label">Balance:</span>
+                                    <span class="total-value" th:classappend="${group.totalBalance <= 0} ? 'text-success' : 'text-danger'"
+                                          th:text="'P' + ${#numbers.formatDecimal(group.totalBalance, 1, 2)}">P0.00</span>
+                                </div>
+                                <div class="accordion-arrow"><i class="fas fa-chevron-down"></i></div>
+                            </div>
+                            <div class="accordion-body" th:id="'enrollment-' + ${iter.index}">
+                                <table class="table accordion-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Course Code</th>
+                                            <th>Course</th>
+                                            <th>Units</th>
+                                            <th>Tuition</th>
+                                            <th>Paid</th>
+                                            <th>Balance</th>
+                                            <th>Status</th>
+                                            <th>Date</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="c : ${group.courses}">
+                                            <td th:text="${c.courseCode}">CS101</td>
+                                            <td th:text="${c.courseName}">Programming</td>
+                                            <td th:text="${c.units}">3</td>
+                                            <td th:text="'P' + ${#numbers.formatDecimal(c.totalTuition, 1, 2)}">P4500.00</td>
+                                            <td th:text="'P' + ${#numbers.formatDecimal(c.paid, 1, 2)}">P0.00</td>
+                                            <td th:text="'P' + ${#numbers.formatDecimal(c.balance, 1, 2)}">P4500.00</td>
+                                            <td><span class="badge badge-success" th:text="${c.status}">Enrolled</span></td>
+                                            <td th:text="${c.enrollmentDate}">2024-01-15</td>
+                                            <td class="actions-cell">
+                                                <form th:action="@{/enrollments/{id}/drop(id=${c.enrollmentId})}" method="post" style="display:inline"
+                                                      th:attr="data-confirm='Drop ' + ${group.studentName} + ' from ' + ${c.courseName} + '?'"
+                                                      data-confirm-title="Drop Enrollment" data-confirm-type="warning">
+                                                    <button type="submit" class="btn btn-sm btn-danger"><i class="fas fa-user-minus"></i></button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <div class="card">
                 <div class="card-header">
                     <div class="card-header-row">
-                        <span>Enrollment History (Audit Log)</span>
+                        <span><i class="fas fa-history"></i> Enrollment History (Audit Log)</span>
                         <div class="card-actions">
                             <form method="get" th:action="@{/enrollments}" class="search-form">
                                 <input type="hidden" name="search" th:value="${search}">
@@ -116,39 +138,45 @@
                         <i class="fas fa-history"></i>
                         <p>No audit records found.</p>
                     </div>
-                    <table th:if="${!#lists.isEmpty(auditLogs)}" class="table">
-                        <thead>
-                            <tr>
-                                <th>Audit ID</th>
-                                <th>Student</th>
-                                <th>Course Code</th>
-                                <th>Course</th>
-                                <th>Action</th>
-                                <th>Date &amp; Time</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="a : ${auditLogs}">
-                                <td th:text="${a.auditId}">1</td>
-                                <td th:text="${a.studentName}">Juan Dela Cruz</td>
-                                <td th:text="${a.courseCode}">CS101</td>
-                                <td th:text="${a.courseName}">Programming</td>
-                                <td>
-                                    <span th:classappend="${a.action == 'ENROLLED'} ? 'badge badge-success' : 'badge badge-warning'"
-                                          th:text="${a.action}">ENROLLED</span>
-                                </td>
-                                <td th:text="${a.actionDate}">2024-01-15 10:30:00</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <div th:if="${!#lists.isEmpty(auditLogs)}" class="table-wrap">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Student</th>
+                                    <th>Course Code</th>
+                                    <th>Course</th>
+                                    <th>Action</th>
+                                    <th>Date &amp; Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="a : ${auditLogs}">
+                                    <td th:text="${a.auditId}">1</td>
+                                    <td th:text="${a.studentName}">Juan Dela Cruz</td>
+                                    <td th:text="${a.courseCode}">CS101</td>
+                                    <td th:text="${a.courseName}">Programming</td>
+                                    <td>
+                                        <span th:classappend="${a.action == 'ENROLLED'} ? 'badge badge-success' : 'badge badge-warning'"
+                                              th:text="${a.action}">ENROLLED</span>
+                                    </td>
+                                    <td th:text="${a.actionDate}">2024-01-15 10:30:00</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </main>
     </div>
     <div th:replace="~{fragments/header :: footer}"></div>
     <script>
-        function confirmDrop(studentName, courseName) {
-            return confirm('Drop ' + studentName + ' from ' + courseName + '?');
+        function toggleAccordion(header) {
+            header.classList.toggle('open');
+            var body = document.getElementById(header.getAttribute('data-target'));
+            if (body) {
+                body.classList.toggle('open');
+            }
         }
     </script>
 </body>

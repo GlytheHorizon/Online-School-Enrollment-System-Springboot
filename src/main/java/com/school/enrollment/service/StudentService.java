@@ -87,4 +87,11 @@ public class StudentService {
     public boolean exists(String studentId) {
         return studentRepository.existsById(studentId);
     }
+
+    public void delete(String studentId) {
+        if (hasPayments(studentId)) {
+            throw new RuntimeException("Cannot delete student — payment records exist. Deactivate instead.");
+        }
+        studentRepository.deleteById(studentId);
+    }
 }

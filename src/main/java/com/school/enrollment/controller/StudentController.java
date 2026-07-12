@@ -34,6 +34,7 @@ public class StudentController {
         } else {
             students = studentService.searchActive(search);
         }
+        model.addAttribute("currentPage", "students");
         model.addAttribute("students", students);
         model.addAttribute("archived", archived);
         model.addAttribute("search", search);
@@ -51,6 +52,7 @@ public class StudentController {
         for (Enrollment e : enrollments) {
             paidMap.put(e.getEnrollmentId(), enrollmentService.getTotalPaid(e.getEnrollmentId()));
         }
+        model.addAttribute("currentPage", "students");
         model.addAttribute("student", student);
         model.addAttribute("enrollments", enrollments);
         model.addAttribute("paidMap", paidMap);
@@ -133,6 +135,18 @@ public class StudentController {
             redirectAttributes.addFlashAttribute("success", "Student reactivated successfully!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Error reactivating student: " + e.getMessage());
+        }
+        return "redirect:/students";
+    }
+
+    @PostMapping("/{id}/delete")
+    public String delete(@PathVariable("id") String studentId,
+                         RedirectAttributes redirectAttributes) {
+        try {
+            studentService.delete(studentId);
+            redirectAttributes.addFlashAttribute("success", "Student permanently deleted!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
         }
         return "redirect:/students";
     }

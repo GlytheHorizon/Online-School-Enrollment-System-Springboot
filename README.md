@@ -1,7 +1,11 @@
 # Online School Enrollment System — Spring Boot
 
-A Spring Boot web application for managing student enrollment, courses, and tuition payments.  
-Migrated from the original Java Swing desktop application (MVC + DAO → Spring Boot + JPA + Thymeleaf).
+**⚠️ EXPERIMENTAL / PERSONAL TEST PROJECT**
+
+This is a personal Spring Boot experiment and testing project by **Jerwin E. Cruz**.  
+I have **no prior knowledge** in Spring Boot or Java web development — this entire codebase was **vibe-coded** with AI assistance.
+
+---
 
 ## Group 2
 
@@ -15,8 +19,8 @@ Migrated from the original Java Swing desktop application (MVC + DAO → Spring 
 
 - **Java 17** + Spring Boot 3.2.5
 - **Spring Data JPA** (replaces JDBC + DAO layer)
-- **Spring MVC** with **Thymeleaf** templating (replaces Swing UI)
-- **MySQL** (same schema as original)
+- **Spring MVC** with **Thymeleaf** templating
+- **MySQL** database
 - **Maven** build
 - **Railway**-ready deployment
 
@@ -25,16 +29,18 @@ Migrated from the original Java Swing desktop application (MVC + DAO → Spring 
 ```
 src/main/java/com/school/enrollment/
 ├── SchoolEnrollmentApplication.java      # Entry point
-├── entity/                               # JPA entities (replaces model/)
-├── repository/                           # Spring Data JPA (replaces dao/ + daoimpl/)
-├── service/                              # Business logic (replaces Swing controllers)
-└── controller/                           # Spring MVC controllers (web endpoints)
+├── entity/                               # JPA entities
+├── repository/                           # Spring Data JPA repositories
+├── service/                              # Business logic
+└── controller/                           # Spring MVC controllers
 
 src/main/resources/
 ├── application.properties                # Config (env vars for Railway)
-├── static/css/style.css                  # Styles
+├── static/
+│   ├── css/style.css                     # Styles
+│   └── js/site.js                        # Interactive enhancements
 └── templates/
-    ├── index.html                        # Dashboard
+    ├── info.html                         # About/info page
     ├── students.html                     # Student list + registration form
     ├── student-details.html              # Student detail/edit view
     ├── courses.html                      # Course management
@@ -60,22 +66,16 @@ Set environment variables (or edit `application.properties`):
 - `DB_PASSWORD` — MySQL password (default: empty)
 - `PORT` — Server port (default: `8080`)
 
-## Railway Deployment
-
-The project is pre-configured for Railway:
-- `system.properties` — declares Java 17 runtime
-- `Procfile` / `Railway.json` — start command using `$PORT`
-- Environment variables for DB credentials
-- `application.properties` reads `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `PORT`
-
 ## Features
 
-- **Student Registration** — Add, update, search, deactivate/reactivate (soft-delete)
-- **Course Management** — Add, update, search, deactivate (blocked if active enrollments exist)
-- **Enrollment** — Enroll in multiple courses at once, drop (blocked if paid), audit log
+- **Student Registration** — Add, update, search, deactivate/reactivate, hard-delete
+- **Course Management** — Add, update, search, deactivate, hard-delete
+- **Enrollment** — Enroll in multiple courses at once, grouped per-student accordion view, drop (blocked if paid), audit log
 - **Tuition Payment** — Cash/Bank Transfer/Check, proportional distribution across enrollments
-- All validations and business logic preserved from original Swing application
+- **Modern UI** — Responsive sidebar, modal dialogs, toast notifications, dark sidebar with gradients
 
-## Original Swing Project
+## Notes
 
-The original Java Swing implementation is in the `activity15` folder.
+- This project was built for **educational / testing purposes only**
+- The UI was enhanced with modern CSS and vanilla JS (no frontend framework)
+- Not intended for production use
