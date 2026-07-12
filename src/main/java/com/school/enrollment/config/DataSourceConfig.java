@@ -41,37 +41,59 @@ public class DataSourceConfig {
         return ds;
     }
 
+    private static final String DEFAULT_MYSQL_HOST = "MySQL.railway.internal";
+
     private RailwayDbConfig parseRailwayEnv() {
         String mysqlUrl = env("MYSQL_URL");
-        if (mysqlUrl != null && mysqlUrl.startsWith("mysql://")) {
-            try {
-                URI uri = new URI(mysqlUrl);
-                String userInfo = uri.getUserInfo();
-                String host = uri.getHost();
-                int port = uri.getPort();
-                String path = uri.getPath();
-                if (userInfo != null && host != null && path != null) {
-                    String[] up = userInfo.split(":", 2);
-                    String user = up[0];
-                    String pass = up.length > 1 ? up[1] : "";
-                    String db = path.replace("/", "");
-                    String jdbcUrl = String.format(
-                        "jdbc:mysql://%s:%d/%s?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC",
-                        host, port, db);
-                    return new RailwayDbConfig(jdbcUrl, user, pass);
+        if (mysqlUrl != null) {
+            if (!mysqlUrl.startsWith("mysql://")) {
+                log.warn("=== MYSQL_URL is set but does not start with 'mysql://', value={}. Falling back to individual MYSQL* vars.", mysqlUrl);
+            } else {
+                try {
+                    URI uri = new URI(mysqlUrl);
+                    String userInfo = uri.getUserInfo();
+                    String host = uri.getHost();
+                    int port = uri.getPort();
+                    String path = uri.getPath();
+
+                    if (userInfo == null) {
+                        log.warn("=== MYSQL_URL={} is missing user info (user:password@host). Falling back to individual MYSQL* vars.", mysqlUrl);
+                    } else if (host == null) {
+                        log.warn("=== MYSQL_URL={} is missing a host. Falling back to individual MYSQL* vars.", mysqlUrl);
+                    } else if (path == null || path.isEmpty() || path.equals("/")) {
+                        log.warn("=== MYSQL_URL={} is missing a database name in the path. Falling back to individual MYSQL* vars.", mysqlUrl);
+                    } else {
+                        String[] up = userInfo.split(":", 2);
+                        String user = up[0];
+                        String pass = up.length > 1 ? up[1] : "";
+                        String db = path.replace("/", "");
+                        int resolvedPort = port > 0 ? port : 3306;
+                        String jdbcUrl = String.format(
+                            "jdbc:mysql://%s:%d/%s?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC",
+                            host, resolvedPort, db);
+                        log.info("=== Successfully parsed MYSQL_URL. host={}, port={}, database={}", host, resolvedPort, db);
+                        return new RailwayDbConfig(jdbcUrl, user, pass);
+                    }
+                } catch (URISyntaxException e) {
+                    log.warn("=== Failed to parse MYSQL_URL={}. Falling back to individual MYSQL* vars.", mysqlUrl, e);
                 }
-            } catch (URISyntaxException e) {
-                log.warn("Failed to parse MYSQL_URL={}", mysqlUrl, e);
             }
+        } else {
+            log.info("=== MYSQL_URL is not set. Falling back to individual MYSQL* vars.");
         }
 
-        String host = env("MYSQLHOST", "localhost");
+        String host = env("MYSQLHOST", DEFAULT_MYSQL_HOST);
         String port = env("MYSQLPORT", "3306");
         String db = env("MYSQLDATABASE", "railway");
         String user = env("MYSQLUSER", "root");
         String pass = env("MYSQLPASSWORD");
         if (pass == null) pass = env("MYSQL_ROOT_PASSWORD", "");
         if (pass == null) pass = "";
+
+        if (env("MYSQLHOST") == null) {
+            log.warn("=== MYSQLHOST is not set, defaulting to Railway internal DNS name '{}'. " +
+                "This only works if a MySQL service is deployed in the same Railway project/environment.", DEFAULT_MYSQL_HOST);
+        }
 
         String jdbcUrl = String.format(
             "jdbc:mysql://%s:%s/%s?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC",
